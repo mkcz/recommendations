@@ -25,10 +25,12 @@ DELETE /pets/{id} - deletes a Pet record in the database
 """
 
 from flask import jsonify, request, url_for, make_response, abort
+from . import status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
 from service.models import Pet
-from . import status  # HTTP Status Codes
-from . import app  # Import Flask application
+
+# Import Flask application
+from . import app
 
 ######################################################################
 # GET INDEX
@@ -39,7 +41,7 @@ def index():
     app.logger.info("Request for Root URL")
     return (
         jsonify(
-            name="Pet Demo REST API Service",
+            name="API to get recommendations for a item",
             version="1.0",
             paths=url_for("list_pets", _external=True),
         ),
@@ -50,10 +52,10 @@ def index():
 ######################################################################
 # LIST ALL PETS
 ######################################################################
-@app.route("/pets", methods=["GET"])
+@app.route("/recommendations", methods=["GET"])
 def list_pets():
-    """Returns all of the Pets"""
-    app.logger.info("Request for pet list")
+    """Returns all of the recommendation"""
+    app.logger.info("Request for recommendation for category")
     pets = []
     category = request.args.get("category")
     name = request.args.get("name")
@@ -72,7 +74,7 @@ def list_pets():
 ######################################################################
 # RETRIEVE A PET
 ######################################################################
-@app.route("/pets/<int:pet_id>", methods=["GET"])
+@app.route("/recommendations/<int:pet_id>", methods=["GET"])
 def get_pets(pet_id):
     """
     Retrieve a single Pet
@@ -91,7 +93,7 @@ def get_pets(pet_id):
 ######################################################################
 # ADD A NEW PET
 ######################################################################
-@app.route("/pets", methods=["POST"])
+@app.route("/recommendations", methods=["POST"])
 def create_pets():
     """
     Creates a Pet
@@ -114,7 +116,7 @@ def create_pets():
 ######################################################################
 # UPDATE AN EXISTING PET
 ######################################################################
-@app.route("/pets/<int:pet_id>", methods=["PUT"])
+@app.route("/recommendations/<int:pet_id>", methods=["PUT"])
 def update_pets(pet_id):
     """
     Update a Pet
@@ -137,7 +139,7 @@ def update_pets(pet_id):
 ######################################################################
 # DELETE A PET
 ######################################################################
-@app.route("/pets/<int:pet_id>", methods=["DELETE"])
+@app.route("/recommendations/<int:pet_id>", methods=["DELETE"])
 def delete_pets(pet_id):
     """
     Delete a Pet
