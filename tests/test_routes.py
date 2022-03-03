@@ -20,7 +20,7 @@ Test cases can be run with the following:
   coverage report -m
   codecov --token=$CODECOV_TOKEN
 
-  While debugging just these tests it's convenient to use this:
+  While debugging just these tests it's convinient to use this:
     nosetests --stop tests/test_service.py:TestPetServer
 """
 
@@ -30,11 +30,12 @@ import unittest
 
 # from unittest.mock import MagicMock, patch
 from urllib.parse import quote_plus
-from service import app, status
+from service import status  # HTTP Status Codes
 from service.models import db, init_db
+from service.routes import app
 from .factories import PetFactory
 
-# Disable all but critical errors during normal test run
+# Disable all but ciritcal errors during normal test run
 # uncomment for debugging failing tests
 logging.disable(logging.CRITICAL)
 
@@ -42,7 +43,7 @@ logging.disable(logging.CRITICAL)
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/pets"
+BASE_URL = "/recommendations"
 CONTENT_TYPE_JSON = "application/json"
 
 
@@ -78,7 +79,7 @@ class TestPetServer(unittest.TestCase):
         db.drop_all()
 
     def _create_pets(self, count):
-        """Factory method to create pets in bulk"""
+        """Factory method to create items in bulk"""
         pets = []
         for _ in range(count):
             test_pet = PetFactory()
@@ -98,10 +99,10 @@ class TestPetServer(unittest.TestCase):
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
-        self.assertEqual(data["name"], "Pet Demo REST API Service")
+        self.assertEqual(data["name"], "API to get recommendations for a item")
 
     def test_get_pet_list(self):
-        """Get a list of Pets"""
+        """Get a list of items"""
         self._create_pets(5)
         resp = self.app.get(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -109,23 +110,23 @@ class TestPetServer(unittest.TestCase):
         self.assertEqual(len(data), 5)
 
     def test_get_pet(self):
-        """Get a single Pet"""
+        """Get a single item"""
         # get the id of a pet
         test_pet = self._create_pets(1)[0]
         resp = self.app.get(
-            "/pets/{}".format(test_pet.id), content_type=CONTENT_TYPE_JSON
+            "/recommendations/{}".format(test_pet.id), content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["name"], test_pet.name)
 
     def test_get_pet_not_found(self):
-        """Get a Pet thats not found"""
-        resp = self.app.get("/pets/0")
+        """Get a item thats not found"""
+        resp = self.app.get("/recommendations/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_pet(self):
-        """Create a new Pet"""
+        """Create a new item"""
         test_pet = PetFactory()
         logging.debug(test_pet)
         resp = self.app.post(
@@ -190,7 +191,7 @@ class TestPetServer(unittest.TestCase):
     #     self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_pet(self):
-        """Update an existing Pet"""
+        """Update an existing item"""
         # create a pet to update
         test_pet = PetFactory()
         resp = self.app.post(
@@ -203,7 +204,7 @@ class TestPetServer(unittest.TestCase):
         logging.debug(new_pet)
         new_pet["category"] = "unknown"
         resp = self.app.put(
-            "/pets/{}".format(new_pet["id"]),
+            "/recommendations/{}".format(new_pet["id"]),
             json=new_pet,
             content_type=CONTENT_TYPE_JSON,
         )
@@ -212,7 +213,7 @@ class TestPetServer(unittest.TestCase):
         self.assertEqual(updated_pet["category"], "unknown")
 
     def test_delete_pet(self):
-        """Delete a Pet"""
+        """Delete a item"""
         test_pet = self._create_pets(1)[0]
         resp = self.app.delete(
             "{0}/{1}".format(BASE_URL, test_pet.id), content_type=CONTENT_TYPE_JSON
@@ -226,7 +227,7 @@ class TestPetServer(unittest.TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_pet_list_by_category(self):
-        """Query Pets by Category"""
+        """Query items by Category"""
         pets = self._create_pets(10)
         test_category = pets[0].category
         category_pets = [pet for pet in pets if pet.category == test_category]

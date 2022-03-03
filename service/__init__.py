@@ -27,7 +27,6 @@ app = Flask(__name__)
 app.config.from_object("config")
 
 # Import the routes After the Flask app is created
-# pylint: disable=wrong-import-position, cyclic-import
 from service import routes, models, error_handlers
 
 # Set up logging for production
@@ -51,7 +50,7 @@ app.logger.info(70 * "*")
 
 try:
     models.init_db(app)  # make our sqlalchemy tables
-except Exception as error:  # pylint: disable=broad-except
+except Exception as error:
     app.logger.critical("%s: Cannot continue", error)
     # gunicorn requires exit code 4 to stop spawning workers when they die
     sys.exit(4)
