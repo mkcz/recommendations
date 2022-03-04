@@ -149,7 +149,7 @@ class ProductModel(db.Model):
         return cls.query.filter(cls.category == category)
 
     @classmethod
-    def find_highest_price_by_category(cls, category):
+    def find_highest_price_product_by_category(cls, category):
         """Returns the product with the highest price in the given category
 
         Args:

@@ -117,6 +117,8 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(data["name"], product.name)
         self.assertIn("category", data)
         self.assertEqual(data["category"], product.category)
+        self.assertIn("price", data)
+        self.assertEqual(data["price"], product.price)
 
     def test_deserialize_a_product(self):
         """Test deserialization of a item"""
@@ -142,20 +144,21 @@ class TestProductModel(unittest.TestCase):
         product = ProductModel()
         self.assertRaises(DataValidationError, product.deserialize, data)
 
-    # def test_find_product(self):
-    #     """Find a item by ID"""
-    #     products = productFactory.create_batch(3)
-    #     for product in products:
-    #         product.create()
-    #     logging.debug(products)
-    #     # make sure they got saved
-    #     self.assertEqual(len(product.all()), 3)
-    #     # find the 2nd product in the list
-    #     product = product.find(products[1].id)
-    #     self.assertIsNot(product, None)
-    #     self.assertEqual(product.id, products[1].id)
-    #     self.assertEqual(product.name, products[1].name)
-    #     self.assertEqual(product.available, products[1].available)
+    def test_find_product(self):
+        """Find a product by ID"""
+        products = productFactory.create_batch(3)
+        for product in products:
+            product.create()
+        logging.debug(products)
+        # make sure they got saved
+        self.assertEqual(len(product.all()), 3)
+        # find the 2nd product in the list
+        product = product.find(products[1].id)
+        self.assertIsNot(product, None)
+        self.assertEqual(product.id, products[1].id)
+        self.assertEqual(product.name, products[1].name)
+        self.assertEqual(product.category, products[1].category)
+        self.assertEqual(product.price, products[1].price)
 
     def test_find_by_category(self):
         """Find items by Category"""
@@ -177,36 +180,6 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(products[0].category, "Laptop")
         self.assertEqual(products[0].name, "Mac")
 
-    # def test_find_by_availability(self):
-    #     """Find items by Availability"""
-    #     product(name="fido", category="dog", available=True).create()
-    #     product(name="kitty", category="cat", available=False).create()
-    #     product(name="fifi", category="dog", available=True).create()
-    #     products = product.find_by_availability(False)
-    #     product_list = [product for product in products]
-    #     self.assertEqual(len(product_list), 1)
-    #     self.assertEqual(products[0].name, "kitty")
-    #     self.assertEqual(products[0].category, "cat")
-    #     products = product.find_by_availability(True)
-    #     product_list = [product for product in products]
-    #     self.assertEqual(len(product_list), 2)
-
-    # def test_find_by_gender(self):
-    #     """Find items by Gender"""
-    #     product(name="fido", category="dog", available=True, gender=Gender.Male).create()
-    #     product(
-    #         name="kitty", category="cat", available=False, gender=Gender.Female
-    #     ).create()
-    #     product(name="fifi", category="dog", available=True, gender=Gender.Male).create()
-    #     products = product.find_by_gender(Gender.Female)
-    #     product_list = [product for product in products]
-    #     self.assertEqual(len(product_list), 1)
-    #     self.assertEqual(products[0].name, "kitty")
-    #     self.assertEqual(products[0].category, "cat")
-    #     products = product.find_by_gender(Gender.Male)
-    #     product_list = [product for product in products]
-    #     self.assertEqual(len(product_list), 2)
-
     def test_find_or_404_found(self):
         """Find or return 404 found"""
         product = ProductModel(name="IPhone", category="phone",id=0)
@@ -222,18 +195,35 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_products_of_same_category_greater_price(self):
         """Find products greater than the price of given item"""
-        product = ProductModel(name="IPhone", category="phone",id=0, price='100')
+        product = ProductModel(name="IPhone", category="phone",id=0, price=100)
         product.create()
-        product = ProductModel(name="pixel", category="phone",id=0, price='200')
+        product = ProductModel(name="pixel", category="phone",id=1, price=200)
         product.create()
-        products = product.find_products_of_same_category_greater_price('Iphone')
+        products = product.find_products_of_same_category_greater_price("Iphone")
         self.assertIsNot(products, None)
 
     def test_find_products_of_same_category(self):
-        """Find products os same category"""
-        product = ProductModel(name="IPhone", category="phone",id=0, price='100')
+        """Find products of same category"""
+        product = ProductModel(name="IPhone", category="phone",id=0, price=100)
         product.create()
-        product = ProductModel(name="pixel", category="phone",id=0, price='200')
+        product = ProductModel(name="pixel", category="phone",id=0, price=200)
         product.create()
-        products = product.find_products_of_same_category('Iphone')
+        products = product.find_products_of_same_category("Iphone")
         self.assertIsNot(products, None)
+
+    def test_find_highest_price_product_by_category(self):
+        """Find highest price product by category"""
+        product = ProductModel(name="iPhone", category="phone",id=0, price=500)
+        product.create()
+        product = ProductModel(name="pixel", category="phone",id=1, price=200)
+        product.create()
+        product = ProductModel(name="samsung", category="phone",id=2, price=300)
+        product.create()
+        product = ProductModel(name="iMac", category="computer",id=3, price=1000)
+        product.create()
+        product = ProductModel.find_highest_price_product_by_category("phone")
+        self.assertIsNot(product, None)
+        self.assertEqual(product.name, "iPhone")
+        self.assertEqual(product.category, "phone")
+        self.assertEqual(product.id, 0)
+        self.assertEqual(product.price, 500)
