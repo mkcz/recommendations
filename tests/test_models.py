@@ -4,6 +4,7 @@ Test cases for YourResourceModel Model
 """
 from itertools import product
 import logging
+from math import prod
 import unittest
 import os
 from service.models import ProductModel, DataValidationError, db
@@ -90,6 +91,26 @@ class TestYourResourceModel(unittest.TestCase):
         self.assertEqual(len(products), 1)
         self.assertEqual(products[0].id, 1)
         self.assertEqual(products[0].category, "laptop")
+
+    def test_update_a_product_validation_error(self):
+        """Update a item Validation Error"""
+        product = ProductModel(name="IPhone", category="phone")
+        self.assertTrue(product != None)
+        self.assertEqual(product.id, None)
+        product.create()
+        # Change it an save it
+        product.category = "laptop"
+        original_id = product.id
+        product.update()
+        self.assertEqual(product.id, original_id)
+        self.assertEqual(product.category, "laptop")
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        products = ProductModel.all()
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].id, 1)
+        self.assertEqual(products[0].category, "laptop")
+
 
     def test_delete_a_product(self):
         """Delete a item"""
@@ -213,3 +234,21 @@ class TestYourResourceModel(unittest.TestCase):
     def test_find_or_404_not_found(self):
         """Find or return 404 NOT found"""
         self.assertRaises(NotFound, ProductModel.find_or_404, 0)
+    
+    def test_find_products_of_same_category_greater_price(self):
+        """Find products greater than the price of given item"""
+        product = ProductModel(name="IPhone", category="phone",id=0, price='100')
+        product.create()
+        product = ProductModel(name="pixel", category="phone",id=0, price='200')
+        product.create()
+        products = product.find_products_of_same_category_greater_price('Iphone')
+        self.assertIsNot(products, None)
+    
+    def test_find_products_of_same_category(self):
+        """Find products os same category"""
+        product = ProductModel(name="IPhone", category="phone",id=0, price='100')
+        product.create()
+        product = ProductModel(name="pixel", category="phone",id=0, price='200')
+        product.create()
+        products = product.find_products_of_same_category('Iphone')
+        self.assertIsNot(products, None)
