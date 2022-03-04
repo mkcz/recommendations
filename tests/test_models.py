@@ -18,8 +18,8 @@ DATABASE_URI = os.getenv(
 ######################################################################
 #  ProductModel   M O D E L   T E S T   C A S E S
 ######################################################################
-class TestYourResourceModel(unittest.TestCase):
-    """ Test Cases for YourResourceModel Model """
+class TestProductModel(unittest.TestCase):
+    """ Test Cases for Product Model """
 
     @classmethod
     def setUpClass(cls):
@@ -117,7 +117,7 @@ class TestYourResourceModel(unittest.TestCase):
         self.assertEqual(data["name"], product.name)
         self.assertIn("category", data)
         self.assertEqual(data["category"], product.category)
-        
+
     def test_deserialize_a_product(self):
         """Test deserialization of a item"""
         data = {
@@ -166,7 +166,7 @@ class TestYourResourceModel(unittest.TestCase):
         products = product.find_by_category("Laptop")
         self.assertEqual(products[0].category, "Laptop")
         self.assertEqual(products[0].name, "Mac")
-        
+
     def test_find_by_name(self):
         """Find a item by Name"""
         product = ProductModel(name="IPhone", category="phone")
@@ -176,7 +176,7 @@ class TestYourResourceModel(unittest.TestCase):
         products = product.find_by_name("Mac")
         self.assertEqual(products[0].category, "Laptop")
         self.assertEqual(products[0].name, "Mac")
-        
+
     # def test_find_by_availability(self):
     #     """Find items by Availability"""
     #     product(name="fido", category="dog", available=True).create()
@@ -219,7 +219,7 @@ class TestYourResourceModel(unittest.TestCase):
     def test_find_or_404_not_found(self):
         """Find or return 404 NOT found"""
         self.assertRaises(NotFound, ProductModel.find_or_404, 0)
-    
+
     def test_find_products_of_same_category_greater_price(self):
         """Find products greater than the price of given item"""
         product = ProductModel(name="IPhone", category="phone",id=0, price='100')
@@ -228,7 +228,7 @@ class TestYourResourceModel(unittest.TestCase):
         product.create()
         products = product.find_products_of_same_category_greater_price('Iphone')
         self.assertIsNot(products, None)
-    
+
     def test_find_products_of_same_category(self):
         """Find products os same category"""
         product = ProductModel(name="IPhone", category="phone",id=0, price='100')

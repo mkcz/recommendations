@@ -62,6 +62,11 @@ def get_similar_products():
 
 @app.route("/recommendations/<int:item_id>", methods=["GET"])
 def get_products(item_id):
+    """
+    Retrieve a single Product
+
+    This endpoint will return a Product based on it's id
+    """
     app.logger.info("Request for product with id: %s", item_id)
     product = ProductModel.find(item_id)
     if not product:
@@ -73,6 +78,10 @@ def get_products(item_id):
 
 @app.route("/recommendations", methods=["POST"])
 def create_pets():
+    """
+    Creates a Product
+    This endpoint will create a Product based the data in the body that is posted
+    """
     app.logger.info("Request to create a Product")
     check_content_type("application/json")
     product = ProductModel()
@@ -89,7 +98,12 @@ def create_pets():
 
 @app.route("/recommendations/<int:item_id>", methods=["PUT"])
 def update_products(item_id):
-    app.logger.info("Request to update pet with id: %s", item_id)
+    """
+    Update a Product
+
+    This endpoint will update a Product based the body that is posted
+    """
+    app.logger.info("Request to update a product with id: %s", item_id)
     check_content_type("application/json")
     product = ProductModel.find(item_id)
     if not product:
@@ -103,7 +117,12 @@ def update_products(item_id):
 
 
 @app.route("/recommendations/<int:item_id>", methods=["DELETE"])
-def delete_pets(item_id):
+def delete_products(item_id):
+    """
+    Delete a Product
+
+    This endpoint will delete a Pet based the id specified in the path
+    """
     app.logger.info("Request to delete pet with id: %s", item_id)
     product = ProductModel.find(item_id)
     if product:

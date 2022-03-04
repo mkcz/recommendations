@@ -5,7 +5,7 @@ All of the models are stored in this module
 """
 import logging
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy import desc
 from flask import Flask
 
 
@@ -23,7 +23,7 @@ class DataValidationError(Exception):
 
 class ProductModel(db.Model):
     """
-    Class that represents a <your resource model name>
+    Class that represents a product
     """
 
     app = None
@@ -62,6 +62,7 @@ class ProductModel(db.Model):
         """Serializes a Pet into a dictionary"""
         return {
             "id": self.id,
+            "price": self.price,
             "name": self.name,
             "category": self.category,
         }
@@ -75,6 +76,13 @@ class ProductModel(db.Model):
         try:
             self.name = data["name"]
             self.category = data["category"]
+            if isinstance(data["price"], int):
+                self.price = data["price"]
+            else:
+                raise DataValidationError(
+                    "Invalid type for integer [price]:"
+                    + str(type(data["price"]))
+                )
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0])
         except KeyError as error:
@@ -99,37 +107,54 @@ class ProductModel(db.Model):
 
     @classmethod
     def all(cls) -> list:
+        """ Returns all of the Products in the database """
         logger.info("Processing all Products")
         return cls.query.all()
 
     @classmethod
     def find(cls, product_id: int):
+        """ Finds a Product by it's ID """
         logger.info("Processing lookup for id %s ...", product_id)
         return cls.query.get(product_id)
 
     @classmethod
     def find_or_404(cls, product_id: int):
+        """ Find a Product by it's id """
         logger.info("Processing lookup or 404 for id %s ...", product_id)
         return cls.query.get_or_404(product_id)
 
     @classmethod
     def find_by_name(cls, name: str) -> list:
+        """Returns all Products with the given name
+
+        Args:
+            name (string): the name of the Product you want to match
+        """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
-    
+
     @classmethod
     def find_products_of_same_category(cls, name: str):
         category = cls.query.filter(cls.name == name).first()
         return cls.query.filter(cls.category == 'phone')
-    
+
     @classmethod
     def find_products_of_same_category_greater_price(cls, item_name:str):
         price = cls.query.filter(cls.name == item_name).first()
         return cls.query.filter(cls.price > 100)
 
-
     @classmethod
     def find_by_category(cls, category: str) -> list:
         logger.info("Processing category query for %s ...", category)
         return cls.query.filter(cls.category == category)
+
+    @classmethod
+    def find_highest_price_by_category(cls, category):
+        """Returns the product with the highest price in the given category
+
+        Args:
+            category (string): the category in which the Product you want to find
+        """
+        logger.info("Processing highest price query in the category of %s ...", category)
+        return cls.query.filter(cls.category == category).order_by(cls.price.desc()).limit(1)
 
