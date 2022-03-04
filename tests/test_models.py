@@ -136,7 +136,7 @@ class TestProductModel(unittest.TestCase):
 
     def test_deserialize_missing_data(self):
         """Test deserialization of a item with missing data"""
-        data = {"id": 1, "name": "iPhone"}
+        data = {"id": 1, "name": "iPhone", "category": "phone", "price": 500}
         product = ProductModel()
         self.assertRaises(DataValidationError, product.deserialize, data)
 
@@ -215,14 +215,10 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_highest_price_product_by_category(self):
         """Find highest price product by category"""
-        product = ProductModel(name="iPhone", category="phone",id=0, price=500)
-        product.create()
-        product = ProductModel(name="pixel", category="phone",id=1, price=200)
-        product.create()
-        product = ProductModel(name="samsung", category="phone",id=2, price=300)
-        product.create()
-        product = ProductModel(name="iMac", category="computer",id=3, price=1000)
-        product.create()
+        ProductModel(name="iPhone", category="phone",id=0, price=500).create()
+        ProductModel(name="pixel", category="phone",id=1, price=200).create()
+        ProductModel(name="samsung", category="phone",id=2, price=300).create()
+        ProductModel(name="iMac", category="computer",id=3, price=1000).create()
         product = ProductModel.find_highest_price_product_by_category("phone")
         self.assertIsNot(product, None)
         self.assertEqual(product.name, "iPhone")
