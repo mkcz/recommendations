@@ -67,7 +67,7 @@ def get_products(item_id):
     if not product:
         raise NotFound("Product with id '{}' was not found.".format(item_id))
 
-    app.logger.info("Returning product: %s", product.name)
+    app.logger.info("Returning Information regarding product: %s", product.name)
     return make_response(jsonify(product.serialize()), status.HTTP_200_OK)
 
 
