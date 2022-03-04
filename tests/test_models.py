@@ -94,23 +94,8 @@ class TestYourResourceModel(unittest.TestCase):
 
     def test_update_a_product_validation_error(self):
         """Update a item Validation Error"""
-        product = ProductModel(name="IPhone", category="phone")
-        self.assertTrue(product != None)
-        self.assertEqual(product.id, None)
-        product.create()
-        # Change it an save it
-        product.category = "laptop"
-        original_id = product.id
-        product.update()
-        self.assertEqual(product.id, original_id)
-        self.assertEqual(product.category, "laptop")
-        # Fetch it back and make sure the id hasn't changed
-        # but the data did change
-        products = ProductModel.all()
-        self.assertEqual(len(products), 1)
-        self.assertEqual(products[0].id, 1)
-        self.assertEqual(products[0].category, "laptop")
-
+        product = ProductModel(name="IPhone", category="phone", id=None)
+        self.assertRaises(DataValidationError, product.update)
 
     def test_delete_a_product(self):
         """Delete a item"""
