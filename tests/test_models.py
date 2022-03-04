@@ -54,17 +54,17 @@ class TestProductModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """Create a item and assert that it exists"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         self.assertTrue(product != None)
         self.assertEqual(product.id, None)
-        self.assertEqual(product.name, "IPhone")
+        self.assertEqual(product.name, "iPhone")
         self.assertEqual(product.category, "phone")
 
     def test_add_a_product(self):
         """Create a item and add it to the database"""
         products = ProductModel.all()
         self.assertEqual(products, [])
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         self.assertTrue(product != None)
         self.assertEqual(product.id, None)
         product.create()
@@ -75,7 +75,7 @@ class TestProductModel(unittest.TestCase):
 
     def test_update_a_product(self):
         """Update a item"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         self.assertTrue(product != None)
         self.assertEqual(product.id, None)
         product.create()
@@ -94,12 +94,12 @@ class TestProductModel(unittest.TestCase):
 
     def test_update_a_product_validation_error(self):
         """Update a item Validation Error"""
-        product = ProductModel(name="IPhone", category="Phone", id=None)
+        product = ProductModel(name="iPhone", category="Phone", id=None)
         self.assertRaises(DataValidationError, product.update)
 
     def test_delete_a_product(self):
         """Delete a item"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         product.create()
         self.assertEqual(len(product.all()), 1)
         # delete the product and make sure it isn't in the database
@@ -108,7 +108,7 @@ class TestProductModel(unittest.TestCase):
 
     def test_serialize_a_product(self):
         """Test serialization of a item"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         data = product.serialize()
         self.assertNotEqual(data, None)
         self.assertIn("id", data)
@@ -123,18 +123,20 @@ class TestProductModel(unittest.TestCase):
     def test_deserialize_a_product(self):
         """Test deserialization of a item"""
         data = {
-            "name": "IPhone",
-            "category": "phone"
+            "name": "iPhone",
+            "category": "phone",
+            "price": 500,
         }
         product = ProductModel()
         product.deserialize(data)
         self.assertNotEqual(product, None)
-        self.assertEqual(product.name, "IPhone")
+        self.assertEqual(product.name, "iPhone")
         self.assertEqual(product.category, "phone")
+        self.assertEqual(product.price, 500)
 
     def test_deserialize_missing_data(self):
         """Test deserialization of a item with missing data"""
-        data = {"id": 1, "name": "Iphone"}
+        data = {"id": 1, "name": "iPhone"}
         product = ProductModel()
         self.assertRaises(DataValidationError, product.deserialize, data)
 
@@ -162,27 +164,27 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_by_category(self):
         """Find items by Category"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         product.create()
-        product = ProductModel(name="Mac", category="Laptop")
+        product = ProductModel(name="Mac", category="laptop")
         product.create()
-        products = product.find_by_category("Laptop")
-        self.assertEqual(products[0].category, "Laptop")
+        products = product.find_by_category("laptop")
+        self.assertEqual(products[0].category, "laptop")
         self.assertEqual(products[0].name, "Mac")
 
     def test_find_by_name(self):
         """Find a item by Name"""
-        product = ProductModel(name="IPhone", category="phone")
+        product = ProductModel(name="iPhone", category="phone")
         product.create()
-        product = ProductModel(name="Mac", category="Laptop")
+        product = ProductModel(name="Mac", category="laptop")
         product.create()
         products = product.find_by_name("Mac")
-        self.assertEqual(products[0].category, "Laptop")
+        self.assertEqual(products[0].category, "laptop")
         self.assertEqual(products[0].name, "Mac")
 
     def test_find_or_404_found(self):
         """Find or return 404 found"""
-        product = ProductModel(name="IPhone", category="phone",id=0)
+        product = ProductModel(name="iPhone", category="phone",id=0)
         product.create()
         product = product.find_or_404(product.id)
         self.assertIsNot(product, None)
@@ -195,20 +197,20 @@ class TestProductModel(unittest.TestCase):
 
     def test_find_products_of_same_category_greater_price(self):
         """Find products greater than the price of given item"""
-        product = ProductModel(name="IPhone", category="phone",id=0, price=100)
+        product = ProductModel(name="iPhone", category="phone",id=0, price=100)
         product.create()
         product = ProductModel(name="pixel", category="phone",id=1, price=200)
         product.create()
-        products = product.find_products_of_same_category_greater_price("Iphone")
+        products = product.find_products_of_same_category_greater_price("iPhone")
         self.assertIsNot(products, None)
 
     def test_find_products_of_same_category(self):
         """Find products of same category"""
-        product = ProductModel(name="IPhone", category="phone",id=0, price=100)
+        product = ProductModel(name="iPhone", category="phone",id=0, price=100)
         product.create()
-        product = ProductModel(name="pixel", category="phone",id=0, price=200)
+        product = ProductModel(name="pixel", category="phone",id=1, price=200)
         product.create()
-        products = product.find_products_of_same_category("Iphone")
+        products = product.find_products_of_same_category("iPhone")
         self.assertIsNot(products, None)
 
     def test_find_highest_price_product_by_category(self):
