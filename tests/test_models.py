@@ -94,7 +94,7 @@ class TestYourResourceModel(unittest.TestCase):
 
     def test_update_a_product_validation_error(self):
         """Update a item Validation Error"""
-        product = ProductModel(name="IPhone", category="phone", id=None)
+        product = ProductModel(name="IPhone", category="Phone", id=None)
         self.assertRaises(DataValidationError, product.update)
 
     def test_delete_a_product(self):
