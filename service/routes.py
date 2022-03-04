@@ -1,33 +1,23 @@
-# Copyright 2016, 2019 John J. Rofrano. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """
-Pet Store Service
+My Service
 
-Paths:
-------
-GET /pets - Returns a list all of the Pets
-GET /pets/{id} - Returns the Pet with a given id number
-POST /pets - creates a new Pet record in the database
-PUT /pets/{id} - updates a Pet record in the database
-DELETE /pets/{id} - deletes a Pet record in the database
+Describe what your service does here
 """
 
-from flask import jsonify, request, url_for, make_response, abort
+from itertools import product
+from math import prod
+import os
+import sys
+import logging
+from flask import Flask, jsonify, request, url_for, make_response, abort
 from . import status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
-from service.models import Pet
+
+
+# For this example we'll use SQLAlchemy, a popular ORM that supports a
+# variety of backends including SQLite, MySQL, and PostgreSQL
+from flask_sqlalchemy import SQLAlchemy
+from service.models import ProductModel, DataValidationError
 
 # Import Flask application
 from . import app
@@ -43,122 +33,86 @@ def index():
         jsonify(
             name="API to get recommendations for a item",
             version="1.0",
-            paths=url_for("list_pets", _external=True),
+            paths=url_for("get_similar_products", _external=True),
         ),
         status.HTTP_200_OK,
     )
 
-
-######################################################################
-# LIST ALL PETS
-######################################################################
 @app.route("/recommendations", methods=["GET"])
-def list_pets():
+def get_similar_products():
     """Returns all of the recommendation"""
     app.logger.info("Request for recommendation for category")
     pets = []
     category = request.args.get("category")
     name = request.args.get("name")
     if category:
-        pets = Pet.find_by_category(category)
+        products = ProductModel.find_by_category(category)
     elif name:
-        pets = Pet.find_pets_of_same_category(name)
+        products = ProductModel.find_pets_of_same_category(name)
     else:
-        pets = Pet.all()
+        products = ProductModel.all()
 
-    results = [pet.serialize() for pet in pets]
+    results = [pet.serialize() for pet in products]
     app.logger.info("Returning %d pets", len(results))
     return make_response(jsonify(results), status.HTTP_200_OK)
 
 
-######################################################################
-# RETRIEVE A PET
-######################################################################
 @app.route("/recommendations/<int:item_id>", methods=["GET"])
-def get_pets(item_id):
-    """
-    Retrieve a single Pet
+def get_products(item_id):
+    app.logger.info("Request for product with id: %s", item_id)
+    product = ProductModel.find(item_id)
+    if not product:
+        raise NotFound("Product with id '{}' was not found.".format(item_id))
 
-    This endpoint will return a Pet based on it's id
-    """
-    app.logger.info("Request for pet with id: %s", item_id)
-    pet = Pet.find(item_id)
-    if not pet:
-        raise NotFound("Pet with id '{}' was not found.".format(item_id))
-
-    app.logger.info("Returning pet: %s", pet.name)
-    return make_response(jsonify(pet.serialize()), status.HTTP_200_OK)
+    app.logger.info("Returning product: %s", product.name)
+    return make_response(jsonify(product.serialize()), status.HTTP_200_OK)
 
 
-######################################################################
-# ADD A NEW PET
-######################################################################
 @app.route("/recommendations", methods=["POST"])
 def create_pets():
-    """
-    Creates a Pet
-    This endpoint will create a Pet based the data in the body that is posted
-    """
-    app.logger.info("Request to create a pet")
+    app.logger.info("Request to create a Product")
     check_content_type("application/json")
-    pet = Pet()
-    pet.deserialize(request.get_json())
-    pet.create()
-    message = pet.serialize()
-    location_url = url_for("get_pets", item_id=pet.id, _external=True)
+    product = ProductModel()
+    product.deserialize(request.get_json())
+    product.create()
+    message = product.serialize()
+    location_url = url_for("get_products", item_id=product.id, _external=True)
 
-    app.logger.info("Pet with ID [%s] created.", pet.id)
+    app.logger.info("product with ID [%s] created.", product.id)
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
 
 
-######################################################################
-# UPDATE AN EXISTING PET
-######################################################################
 @app.route("/recommendations/<int:item_id>", methods=["PUT"])
-def update_pets(item_id):
-    """
-    Update a Pet
-
-    This endpoint will update a Pet based the body that is posted
-    """
+def update_products(item_id):
     app.logger.info("Request to update pet with id: %s", item_id)
     check_content_type("application/json")
-    pet = Pet.find(item_id)
-    if not pet:
-        raise NotFound("Pet with id '{}' was not found.".format(item_id))
-    pet.deserialize(request.get_json())
-    pet.id = item_id
-    pet.update()
+    product = ProductModel.find(item_id)
+    if not product:
+        raise NotFound("product with id '{}' was not found.".format(item_id))
+    product.deserialize(request.get_json())
+    product.id = item_id
+    product.update()
 
-    app.logger.info("Pet with ID [%s] updated.", pet.id)
-    return make_response(jsonify(pet.serialize()), status.HTTP_200_OK)
+    app.logger.info("product with ID [%s] updated.", product.id)
+    return make_response(jsonify(product.serialize()), status.HTTP_200_OK)
 
 
-######################################################################
-# DELETE A PET
-######################################################################
 @app.route("/recommendations/<int:item_id>", methods=["DELETE"])
 def delete_pets(item_id):
-    """
-    Delete a Pet
-
-    This endpoint will delete a Pet based the id specified in the path
-    """
     app.logger.info("Request to delete pet with id: %s", item_id)
-    pet = Pet.find(item_id)
-    if pet:
-        pet.delete()
+    product = ProductModel.find(item_id)
+    if product:
+        product.delete()
 
-    app.logger.info("Pet with ID [%s] delete complete.", item_id)
+    app.logger.info("product with ID [%s] delete complete.", item_id)
     return make_response("", status.HTTP_204_NO_CONTENT)
 
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
 
 def check_content_type(media_type):
     """Checks that the media type is correct"""
@@ -170,3 +124,7 @@ def check_content_type(media_type):
         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
         "Content-Type must be {}".format(media_type),
     )
+
+def init_db():
+    """ Initializes the SQLAlchemy app """
+    ProductModel.init_db(app)

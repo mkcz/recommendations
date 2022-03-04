@@ -1,54 +1,35 @@
-# Copyright 2016, 2021 John J. Rofrano. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+"""
+Test cases for YourResourceModel Model
 
 """
-Test cases for Pet Model
-
-Test cases can be run with:
-    nosetests
-    coverage report -m
-
-While debugging just these tests it's convinient to use this:
-    nosetests --stop tests/test_pets.py:TestPetModel
-
-"""
-import os
+from itertools import product
 import logging
 import unittest
-from werkzeug.exceptions import NotFound
-from service.models import Pet, Gender, DataValidationError, db
+import os
+from service.models import ProductModel, DataValidationError, db
 from service import app
-from .factories import PetFactory
+from werkzeug.exceptions import NotFound
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
 )
 
 ######################################################################
-#  P E T   M O D E L   T E S T   C A S E S
+#  ProductModel   M O D E L   T E S T   C A S E S
 ######################################################################
-class TestPetModel(unittest.TestCase):
-    """Test Cases for Pet Model"""
+class TestYourResourceModel(unittest.TestCase):
+    """ Test Cases for YourResourceModel Model """
 
     @classmethod
     def setUpClass(cls):
+        """ This runs once before the entire test suite """
         """This runs once before the entire test suite"""
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
-        Pet.init_db(app)
+        ProductModel.init_db(app)
+        pass
 
     @classmethod
     def tearDownClass(cls):
@@ -65,202 +46,170 @@ class TestPetModel(unittest.TestCase):
         db.session.remove()
         db.drop_all()
 
+
     ######################################################################
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_create_a_pet(self):
+    def test_create_a_product(self):
         """Create a item and assert that it exists"""
-        pet = Pet(name="fido", category="dog", available=True, gender=Gender.Male)
-        self.assertTrue(pet != None)
-        self.assertEqual(pet.id, None)
-        self.assertEqual(pet.name, "fido")
-        self.assertEqual(pet.category, "dog")
-        self.assertEqual(pet.available, True)
-        self.assertEqual(pet.gender, Gender.Male)
-        pet = Pet(name="fido", category="dog", available=False, gender=Gender.Female)
-        self.assertEqual(pet.available, False)
-        self.assertEqual(pet.gender, Gender.Female)
+        product = ProductModel(name="IPhone", category="phone")
+        self.assertTrue(product != None)
+        self.assertEqual(product.id, None)
+        self.assertEqual(product.name, "IPhone")
+        self.assertEqual(product.category, "phone")
 
-    def test_add_a_pet(self):
+    def test_add_a_product(self):
         """Create a item and add it to the database"""
-        pets = Pet.all()
-        self.assertEqual(pets, [])
-        pet = Pet(name="fido", category="dog", available=True, gender=Gender.Male)
-        self.assertTrue(pet != None)
-        self.assertEqual(pet.id, None)
-        pet.create()
+        products = ProductModel.all()
+        self.assertEqual(products, [])
+        product = ProductModel(name="IPhone", category="phone")
+        self.assertTrue(product != None)
+        self.assertEqual(product.id, None)
+        product.create()
         # Asert that it was assigned an id and shows up in the database
-        self.assertEqual(pet.id, 1)
-        pets = Pet.all()
-        self.assertEqual(len(pets), 1)
+        self.assertEqual(product.id, 1)
+        products = product.all()
+        self.assertEqual(len(products), 1)
 
-    def test_update_a_pet(self):
+    def test_update_a_product(self):
         """Update a item"""
-        pet = PetFactory()
-        logging.debug(pet)
-        pet.create()
-        logging.debug(pet)
-        self.assertEqual(pet.id, 1)
+        product = ProductModel(name="IPhone", category="phone")
+        self.assertTrue(product != None)
+        self.assertEqual(product.id, None)
+        product.create()
         # Change it an save it
-        pet.category = "k9"
-        original_id = pet.id
-        pet.update()
-        self.assertEqual(pet.id, original_id)
-        self.assertEqual(pet.category, "k9")
+        product.category = "laptop"
+        original_id = product.id
+        product.update()
+        self.assertEqual(product.id, original_id)
+        self.assertEqual(product.category, "laptop")
         # Fetch it back and make sure the id hasn't changed
         # but the data did change
-        pets = Pet.all()
-        self.assertEqual(len(pets), 1)
-        self.assertEqual(pets[0].id, 1)
-        self.assertEqual(pets[0].category, "k9")
+        products = ProductModel.all()
+        self.assertEqual(len(products), 1)
+        self.assertEqual(products[0].id, 1)
+        self.assertEqual(products[0].category, "laptop")
 
-    def test_delete_a_pet(self):
+    def test_delete_a_product(self):
         """Delete a item"""
-        pet = PetFactory()
-        pet.create()
-        self.assertEqual(len(Pet.all()), 1)
-        # delete the pet and make sure it isn't in the database
-        pet.delete()
-        self.assertEqual(len(Pet.all()), 0)
+        product = ProductModel(name="IPhone", category="phone")
+        product.create()
+        self.assertEqual(len(product.all()), 1)
+        # delete the product and make sure it isn't in the database
+        product.delete()
+        self.assertEqual(len(product.all()), 0)
 
-    def test_serialize_a_pet(self):
+    def test_serialize_a_product(self):
         """Test serialization of a item"""
-        pet = PetFactory()
-        data = pet.serialize()
+        product = ProductModel(name="IPhone", category="phone")
+        data = product.serialize()
         self.assertNotEqual(data, None)
         self.assertIn("id", data)
-        self.assertEqual(data["id"], pet.id)
+        self.assertEqual(data["id"], product.id)
         self.assertIn("name", data)
-        self.assertEqual(data["name"], pet.name)
+        self.assertEqual(data["name"], product.name)
         self.assertIn("category", data)
-        self.assertEqual(data["category"], pet.category)
-        self.assertIn("available", data)
-        self.assertEqual(data["available"], pet.available)
-        self.assertIn("gender", data)
-        self.assertEqual(data["gender"], pet.gender.name)
-
-    def test_deserialize_a_pet(self):
+        self.assertEqual(data["category"], product.category)
+        
+    def test_deserialize_a_product(self):
         """Test deserialization of a item"""
         data = {
-            "id": 1,
-            "name": "kitty",
-            "category": "cat",
-            "available": True,
-            "gender": "Female",
+            "name": "IPhone",
+            "category": "phone"
         }
-        pet = Pet()
-        pet.deserialize(data)
-        self.assertNotEqual(pet, None)
-        self.assertEqual(pet.id, None)
-        self.assertEqual(pet.name, "kitty")
-        self.assertEqual(pet.category, "cat")
-        self.assertEqual(pet.available, True)
-        self.assertEqual(pet.gender, Gender.Female)
+        product = ProductModel()
+        product.deserialize(data)
+        self.assertNotEqual(product, None)
+        self.assertEqual(product.name, "IPhone")
+        self.assertEqual(product.category, "phone")
 
     def test_deserialize_missing_data(self):
         """Test deserialization of a item with missing data"""
-        data = {"id": 1, "name": "kitty", "category": "cat"}
-        pet = Pet()
-        self.assertRaises(DataValidationError, pet.deserialize, data)
+        data = {"id": 1, "name": "Iphone"}
+        product = ProductModel()
+        self.assertRaises(DataValidationError, product.deserialize, data)
 
     def test_deserialize_bad_data(self):
         """Test deserialization of bad data"""
         data = "this is not a dictionary"
-        pet = Pet()
-        self.assertRaises(DataValidationError, pet.deserialize, data)
+        product = ProductModel()
+        self.assertRaises(DataValidationError, product.deserialize, data)
 
-    def test_deserialize_bad_available(self):
-        """ Test deserialization of bad available attribute """
-        test_pet = PetFactory()
-        data = test_pet.serialize()
-        data["available"] = "true"
-        pet = Pet()
-        self.assertRaises(DataValidationError, pet.deserialize, data)
-
-    def test_deserialize_bad_gender(self):
-        """ Test deserialization of bad gender attribute """
-        test_pet = PetFactory()
-        data = test_pet.serialize()
-        data["gender"] = "male" # wrong case
-        pet = Pet()
-        self.assertRaises(DataValidationError, pet.deserialize, data)
-
-    def test_find_pet(self):
-        """Find a item by ID"""
-        pets = PetFactory.create_batch(3)
-        for pet in pets:
-            pet.create()
-        logging.debug(pets)
-        # make sure they got saved
-        self.assertEqual(len(Pet.all()), 3)
-        # find the 2nd pet in the list
-        pet = Pet.find(pets[1].id)
-        self.assertIsNot(pet, None)
-        self.assertEqual(pet.id, pets[1].id)
-        self.assertEqual(pet.name, pets[1].name)
-        self.assertEqual(pet.available, pets[1].available)
+    # def test_find_product(self):
+    #     """Find a item by ID"""
+    #     products = productFactory.create_batch(3)
+    #     for product in products:
+    #         product.create()
+    #     logging.debug(products)
+    #     # make sure they got saved
+    #     self.assertEqual(len(product.all()), 3)
+    #     # find the 2nd product in the list
+    #     product = product.find(products[1].id)
+    #     self.assertIsNot(product, None)
+    #     self.assertEqual(product.id, products[1].id)
+    #     self.assertEqual(product.name, products[1].name)
+    #     self.assertEqual(product.available, products[1].available)
 
     def test_find_by_category(self):
         """Find items by Category"""
-        Pet(name="fido", category="dog", available=True).create()
-        Pet(name="kitty", category="cat", available=False).create()
-        pets = Pet.find_by_category("cat")
-        self.assertEqual(pets[0].category, "cat")
-        self.assertEqual(pets[0].name, "kitty")
-        self.assertEqual(pets[0].available, False)
-
+        product = ProductModel(name="IPhone", category="phone")
+        product.create()
+        product = ProductModel(name="Mac", category="Laptop")
+        product.create()
+        products = product.find_by_category("Laptop")
+        self.assertEqual(products[0].category, "Laptop")
+        self.assertEqual(products[0].name, "Mac")
+        
     def test_find_by_name(self):
         """Find a item by Name"""
-        Pet(name="fido", category="dog", available=True).create()
-        Pet(name="kitty", category="cat", available=False).create()
-        pets = Pet.find_by_name("kitty")
-        self.assertEqual(pets[0].category, "cat")
-        self.assertEqual(pets[0].name, "kitty")
-        self.assertEqual(pets[0].available, False)
-
-    def test_find_by_availability(self):
-        """Find items by Availability"""
-        Pet(name="fido", category="dog", available=True).create()
-        Pet(name="kitty", category="cat", available=False).create()
-        Pet(name="fifi", category="dog", available=True).create()
-        pets = Pet.find_by_availability(False)
-        pet_list = [pet for pet in pets]
-        self.assertEqual(len(pet_list), 1)
-        self.assertEqual(pets[0].name, "kitty")
-        self.assertEqual(pets[0].category, "cat")
-        pets = Pet.find_by_availability(True)
-        pet_list = [pet for pet in pets]
-        self.assertEqual(len(pet_list), 2)
+        product = ProductModel(name="IPhone", category="phone")
+        product.create()
+        product = ProductModel(name="Mac", category="Laptop")
+        product.create()
+        products = product.find_by_name("Mac")
+        self.assertEqual(products[0].category, "Laptop")
+        self.assertEqual(products[0].name, "Mac")
+        
+    # def test_find_by_availability(self):
+    #     """Find items by Availability"""
+    #     product(name="fido", category="dog", available=True).create()
+    #     product(name="kitty", category="cat", available=False).create()
+    #     product(name="fifi", category="dog", available=True).create()
+    #     products = product.find_by_availability(False)
+    #     product_list = [product for product in products]
+    #     self.assertEqual(len(product_list), 1)
+    #     self.assertEqual(products[0].name, "kitty")
+    #     self.assertEqual(products[0].category, "cat")
+    #     products = product.find_by_availability(True)
+    #     product_list = [product for product in products]
+    #     self.assertEqual(len(product_list), 2)
 
     # def test_find_by_gender(self):
     #     """Find items by Gender"""
-    #     Pet(name="fido", category="dog", available=True, gender=Gender.Male).create()
-    #     Pet(
+    #     product(name="fido", category="dog", available=True, gender=Gender.Male).create()
+    #     product(
     #         name="kitty", category="cat", available=False, gender=Gender.Female
     #     ).create()
-    #     Pet(name="fifi", category="dog", available=True, gender=Gender.Male).create()
-    #     pets = Pet.find_by_gender(Gender.Female)
-    #     pet_list = [pet for pet in pets]
-    #     self.assertEqual(len(pet_list), 1)
-    #     self.assertEqual(pets[0].name, "kitty")
-    #     self.assertEqual(pets[0].category, "cat")
-    #     pets = Pet.find_by_gender(Gender.Male)
-    #     pet_list = [pet for pet in pets]
-    #     self.assertEqual(len(pet_list), 2)
+    #     product(name="fifi", category="dog", available=True, gender=Gender.Male).create()
+    #     products = product.find_by_gender(Gender.Female)
+    #     product_list = [product for product in products]
+    #     self.assertEqual(len(product_list), 1)
+    #     self.assertEqual(products[0].name, "kitty")
+    #     self.assertEqual(products[0].category, "cat")
+    #     products = product.find_by_gender(Gender.Male)
+    #     product_list = [product for product in products]
+    #     self.assertEqual(len(product_list), 2)
 
     def test_find_or_404_found(self):
         """Find or return 404 found"""
-        pets = PetFactory.create_batch(3)
-        for pet in pets:
-            pet.create()
-
-        pet = Pet.find_or_404(pets[1].id)
-        self.assertIsNot(pet, None)
-        self.assertEqual(pet.id, pets[1].id)
-        self.assertEqual(pet.name, pets[1].name)
-        self.assertEqual(pet.available, pets[1].available)
+        product = ProductModel(name="IPhone", category="phone",id=0)
+        product.create()
+        product = product.find_or_404(product.id)
+        self.assertIsNot(product, None)
+        self.assertEqual(product.id, product.id)
+        self.assertEqual(product.name, product.name)
 
     def test_find_or_404_not_found(self):
         """Find or return 404 NOT found"""
-        self.assertRaises(NotFound, Pet.find_or_404, 0)
+        self.assertRaises(NotFound, ProductModel.find_or_404, 0)
