@@ -30,6 +30,7 @@ class ProductModel(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
+    price = db.Column(db.Integer)
     name = db.Column(db.String(63))
     category = db.Column(db.String(63), nullable=False)
 
@@ -120,6 +121,11 @@ class ProductModel(db.Model):
     def find_products_of_same_category(cls, name: str):
         category = cls.query.filter(cls.name == name).first().category()
         return cls.query.filter(cls.category == category)
+    
+    @classmethod
+    def find_products_of_same_category_greater_price(cls, item_name:str):
+        price = cls.query.filter(cls.name == item_name).first()
+        return cls.query.filter(cls.price > 100)
 
 
     @classmethod

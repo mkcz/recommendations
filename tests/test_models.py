@@ -4,6 +4,7 @@ Test cases for YourResourceModel Model
 """
 from itertools import product
 import logging
+from math import prod
 import unittest
 import os
 from service.models import ProductModel, DataValidationError, db
@@ -213,3 +214,12 @@ class TestYourResourceModel(unittest.TestCase):
     def test_find_or_404_not_found(self):
         """Find or return 404 NOT found"""
         self.assertRaises(NotFound, ProductModel.find_or_404, 0)
+    
+    def test_find_products_of_same_category_greater_price(self):
+        """Find products greater than the price of given item"""
+        product = ProductModel(name="IPhone", category="phone",id=0, price='100')
+        product.create()
+        product = ProductModel(name="pixel", category="phone",id=0, price='200')
+        product.create()
+        products = product.find_products_of_same_category_greater_price('Iphone')
+        self.assertIsNot(products, None)

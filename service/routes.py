@@ -45,10 +45,13 @@ def get_similar_products():
     pets = []
     category = request.args.get("category")
     name = request.args.get("name")
+    price = request.args.get("price")
     if category:
         products = ProductModel.find_by_category(category)
     elif name:
-        products = ProductModel.find_pets_of_same_category(name)
+        products = ProductModel.find_products_of_same_category(name)
+    elif price:
+        products = ProductModel.find_products_of_same_category_greater_price(name)
     else:
         products = ProductModel.all()
 
