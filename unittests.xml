@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="2" errors="1" failures="0" skip="0"><testcase classname="nose.failure.Failure" name="runTest" time="0.001"><error type="builtins.ImportError" message="cannot import name 'YourResourceModel' from 'service.models' (/app/service/models.py)&#10;-------------------- &gt;&gt; begin captured logging &lt;&lt; --------------------&#10;flask.app: INFO: Initializing database&#10;--------------------- &gt;&gt; end captured logging &lt;&lt; ---------------------"><![CDATA[  File "/usr/local/lib/python3.9/unittest/case.py", line 59, in testPartExecutor
+    yield
+  File "/usr/local/lib/python3.9/unittest/case.py", line 592, in run
+    self._callTestMethod(testMethod)
+  File "/usr/local/lib/python3.9/unittest/case.py", line 550, in _callTestMethod
+    method()
+  File "/usr/local/lib/python3.9/site-packages/nose/failure.py", line 39, in runTest
+    raise self.exc_val.with_traceback(self.tb)
+  File "/usr/local/lib/python3.9/site-packages/nose/loader.py", line 417, in loadTestsFromName
+    module = self.importer.importFromPath(
+  File "/usr/local/lib/python3.9/site-packages/nose/importer.py", line 47, in importFromPath
+    return self.importFromDir(dir_path, fqname)
+  File "/usr/local/lib/python3.9/site-packages/nose/importer.py", line 94, in importFromDir
+    mod = load_module(part_fqname, fh, filename, desc)
+  File "/usr/local/lib/python3.9/imp.py", line 234, in load_module
+    return load_source(name, filename, file)
+  File "/usr/local/lib/python3.9/imp.py", line 171, in load_source
+    module = _load(spec)
+  File "<frozen importlib._bootstrap>", line 711, in _load
+  File "<frozen importlib._bootstrap>", line 680, in _load_unlocked
+  File "<frozen importlib._bootstrap_external>", line 850, in exec_module
+  File "<frozen importlib._bootstrap>", line 228, in _call_with_frames_removed
+  File "/app/tests/test_models.py", line 8, in <module>
+    from service.models import YourResourceModel, DataValidationError, db
+cannot import name 'YourResourceModel' from 'service.models' (/app/service/models.py)
+-------------------- >> begin captured logging << --------------------
+flask.app: INFO: Initializing database
+--------------------- >> end captured logging << ---------------------]]></error></testcase><testcase classname="tests.test_routes.TestYourResourceServer" name="test_index" time="0.015"></testcase></testsuite>
