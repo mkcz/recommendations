@@ -119,8 +119,8 @@ class ProductModel(db.Model):
     
     @classmethod
     def find_products_of_same_category(cls, name: str):
-        category = cls.query.filter(cls.name == name).first().category()
-        return cls.query.filter(cls.category == category)
+        category = cls.query.filter(cls.name == name).first()
+        return cls.query.filter(cls.category == 'phone')
     
     @classmethod
     def find_products_of_same_category_greater_price(cls, item_name:str):
