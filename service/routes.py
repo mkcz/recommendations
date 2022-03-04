@@ -127,5 +127,4 @@ def check_content_type(media_type):
 
 def init_db():
     """ Initializes the SQLAlchemy app """
-    global app
     ProductModel.init_db(app)
