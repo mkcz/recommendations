@@ -30,8 +30,8 @@ class ProductModel(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
-    price = db.Column(db.Integer)
-    name = db.Column(db.String(63))
+    price = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(63), nullable=False)
     category = db.Column(db.String(63), nullable=False)
 
     def create(self):
@@ -50,6 +50,10 @@ class ProductModel(db.Model):
         logger.info("Saving %s", self.name)
         if not self.id:
             raise DataValidationError("Update called with empty ID field")
+        if type(self.id) is not int:
+            raise DataValidationError("Update called with non-integer ID field")
+        if type(self.price) is not int:
+            raise DataValidationError("Update called with non-integer price field")
         db.session.commit()
 
     def delete(self):
@@ -144,7 +148,7 @@ class ProductModel(db.Model):
         return cls.query.filter(cls.price > 100)
 
     @classmethod
-    def find_by_category(cls, category: str) -> list:
+    def find_by_category(cls, category: str):
         logger.info("Processing category query for %s ...", category)
         return cls.query.filter(cls.category == category)
 
@@ -156,5 +160,6 @@ class ProductModel(db.Model):
             category (string): the category in which the Product you want to find
         """
         logger.info("Processing highest price query in the category of %s ...", category)
-        return cls.query.filter(cls.category == category).order_by(cls.price.desc()).limit(1)
+        query = cls.query.filter(cls.category == category).order_by(cls.price.desc())
+        return None if len(query.all())==0 else query[0]
 
