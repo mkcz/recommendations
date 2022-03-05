@@ -8,4 +8,4 @@ usually buy item B". Recommendations should have a recommendation type like cros
 (Hint: an up-sell is a more full featured and expensive product that you recommend instead of
 the one they initially want to buy, cross-sells are other items just like this one with similar
 features and price.) You should use enumerations to represent the different recommendation
-types.
+types.    
