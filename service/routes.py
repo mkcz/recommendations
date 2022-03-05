@@ -21,7 +21,18 @@ from . import app
 ######################################################################
 @app.route("/")
 def index():
-    return
+    """Root URL response"""
+    app.logger.info("Request for Root URL")
+    return (
+        jsonify(
+            name="API to get recommendations for a item",
+            version="1.0",
+            paths=url_for("get_similar_products", _external=True),
+        ),
+        status.HTTP_200_OK,
+    )
+
+
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
