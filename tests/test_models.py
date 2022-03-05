@@ -112,3 +112,12 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(recommendation.id, 1)
         recommendations = Recommendation.all()
         self.assertEqual(len(recommendations), 1)
+        
+    def test_delete_a_recommendation(self):
+        """Delete a item"""
+        recommendation = Recommendation(id=1, src_product_id=100, rec_product_id=200, type= "UP_SELL")
+        recommendation.create()
+        self.assertEqual(len(recommendation.all()), 1)
+        # delete the  recommendation and make sure it isn't in the database
+        product.delete()
+        self.assertEqual(len( recommendation.all()), 0)    
