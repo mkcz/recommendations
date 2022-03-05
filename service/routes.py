@@ -39,20 +39,6 @@ def list_recommendations():
 # RETRIEVE A RECOMMENDATION BY ID
 ######################################################################
 
-@app.route("/recommendations/<int:item_id>", methods=["GET"])
-def get_recommendation(item_id):
-    """
-    Retrieve a single recommendation
-    This endpoint will return a recommendation based on it's id
-    """
-    app.logger.info("Request for recommendation with id: %s", item_id)
-    recommendation = Recommendation.find(item_id)
-    if not recommendation:
-        raise NotFound("Recommendation with id '{}' was not found.".format(item_id))
-
-    app.logger.info("Returning Information regarding product: %s", recommendation.id)
-    return make_response(jsonify(recommendation.serialize()), status.HTTP_200_OK)
-
 
 
 ######################################################################
