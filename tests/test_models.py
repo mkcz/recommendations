@@ -5,6 +5,7 @@ Test cases for Recommendation Model
 import os
 import logging
 import unittest
+from werkzeug.exceptions import NotFound
 from service.models import Recommendation, Type, DataValidationError, db
 from service import app
 from .factories import RecommendationFactory
@@ -90,7 +91,31 @@ class TestRecommendationModel(unittest.TestCase):
         recommendation = Recommendation()
         data = "this is not a dictionary"
         self.assertRaises(DataValidationError, recommendation.deserialize, data)
-    
+
+    def test_deserialize_bad_src_product_id(self):
+        """Test deserialization of bad src_product_id attribute"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["src_product_id"] = "12"
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_rec_product_id(self):
+        """Test deserialization of bad rec_product_id attribute"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["rec_product_id"] = "55"
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
+    def test_deserialize_bad_type(self):
+        """Test deserialization of bad type attribute"""
+        test_recommendation = RecommendationFactory()
+        data = test_recommendation.serialize()
+        data["type"] = "accessory"  # wrong case
+        recommendation = Recommendation()
+        self.assertRaises(DataValidationError, recommendation.deserialize, data)
+
     def test_create_a_recommendation(self):
         """Create a Recommendation and assert that it exists"""
         recommendation = Recommendation(id=1, src_product_id=100, rec_product_id=200, type= "UP_SELL")
@@ -112,3 +137,36 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(recommendation.id, 1)
         recommendations = Recommendation.all()
         self.assertEqual(len(recommendations), 1)
+
+    def test_find_recommendation(self):
+        """Find a Recommendation by ID"""
+        recommendations = RecommendationFactory.create_batch(3)
+        for recommendation in recommendations:
+            recommendation.create()
+        logging.debug(recommendations)
+        # make sure they got saved
+        self.assertEqual(len(Recommendation.all()), 3)
+        # find the 2nd recommendation in the list
+        recommendation = Recommendation.find(recommendations[1].id)
+        self.assertIsNot(recommendation, None)
+        self.assertEqual(recommendation.id, recommendations[1].id)
+        self.assertEqual(recommendation.src_product_id, recommendations[1].src_product_id)
+        self.assertEqual(recommendation.src_product_id, recommendations[1].src_product_id)
+        self.assertEqual(recommendation.type, recommendations[1].type)
+
+    def test_find_or_404_found(self):
+        """Find or return 404 found"""
+        recommendations = RecommendationFactory.create_batch(3)
+        for recommendation in recommendations:
+            recommendation.create()
+
+        recommendation = Recommendation.find_or_404(recommendations[1].id)
+        self.assertIsNot(recommendation, None)
+        self.assertEqual(recommendation.id, recommendations[1].id)
+        self.assertEqual(recommendation.src_product_id, recommendations[1].src_product_id)
+        self.assertEqual(recommendation.rec_product_id, recommendations[1].rec_product_id)
+        self.assertEqual(recommendation.type, recommendations[1].type)
+
+    def test_find_or_404_not_found(self):
+        """Find or return 404 NOT found"""
+        self.assertRaises(NotFound, Recommendation.find_or_404, 0)

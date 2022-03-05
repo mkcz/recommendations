@@ -66,7 +66,7 @@ class TestRecommendationServer(TestCase):
             test_recommendation.id = new_recommendation["id"]
             recommendations.append(test_recommendation)
         return recommendations
-    
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -90,20 +90,31 @@ class TestRecommendationServer(TestCase):
         location = resp.headers.get("Location", None)
         self.assertIsNotNone(location)
         # Check the data is correct
-        new_product = resp.get_json()
-        self.assertEqual(new_product["id"], test_recommendation.id, "ID's do not match")
+        new_recommendation = resp.get_json()
+        logging.debug(new_recommendation)
         self.assertEqual(
-            new_product["src_product_id"], test_recommendation.src_product_id, "Source Product ID do not match"
+            new_recommendation["src_product_id"], test_recommendation.src_product_id, "Source Product ID do not match"
+        )
+        self.assertEqual(
+            new_recommendation["rec_product_id"], test_recommendation.rec_product_id, "Recommended Product ID do not match"
+        )
+        self.assertEqual(
+            new_recommendation["type"], test_recommendation.type.name, "Type do not match"
         )
         # Check that the location header was correct
         resp = self.app.get(location, content_type=CONTENT_TYPE_JSON)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        new_product = resp.get_json()
-        self.assertEqual(new_product["id"], test_recommendation.id, "ID's do not match")
+        new_recommendation = resp.get_json()
         self.assertEqual(
-            new_product["src_product_id"], test_recommendation.src_product_id, "Source Product ID do not match"
+            new_recommendation["src_product_id"], test_recommendation.src_product_id, "Source Product ID do not match"
         )
-    
+        self.assertEqual(
+            new_recommendation["rec_product_id"], test_recommendation.rec_product_id, "Recommended Product ID do not match"
+        )
+        self.assertEqual(
+            new_recommendation["type"], test_recommendation.type.name, "Type do not match"
+        )
+
     def test_create_recommendation_no_data(self):
         """Create a recommendation with missing data"""
         resp = self.app.post(BASE_URL, json={}, content_type=CONTENT_TYPE_JSON)

@@ -5,11 +5,9 @@ The recommendations resource is a representation a product recommendation based 
 """
 
 from flask import jsonify, request, url_for, abort, make_response
-
 from service.models import Recommendation
 from . import app, status  # HTTP Status Codes
 from werkzeug.exceptions import NotFound
-
 
 ######################################################################
 # GET INDEX
@@ -39,32 +37,43 @@ def list_recommendations():
 # RETRIEVE A RECOMMENDATION BY ID
 ######################################################################
 
+@app.route("/recommendations/<int:id>", methods=["GET"])
+def get_recommendations(id):
+    """
+    Retrieve a single Recommendation
 
+    This endpoint will return a Recommendation based on it's id
+    """
+    app.logger.info("Request for recommendation with id: %s", id)
+    recommendation = Recommendation.find(id)
+    if not recommendation:
+        raise NotFound("Recommendation with id '{}' was not found.".format(id))
+
+    app.logger.info("Returning recommendation: %s", recommendation.id)
+    return make_response(jsonify(recommendation.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 # ADD A NEW RECOMMENDATION
 ######################################################################
 
 @app.route("/recommendations", methods=["POST"])
-def create_Recommendation():
+def create_recommendations():
     """
     Creates a Recommendation
-    This endpoint will create a Product based the data in the body that is posted
+    This endpoint will create a Recommendation based the data in the body that is posted
     """
-    app.logger.info("Request to create a Product")
+    app.logger.info("Request to create a Recommendation")
     check_content_type("application/json")
     recommendation = Recommendation()
     recommendation.deserialize(request.get_json())
     recommendation.create()
     message = recommendation.serialize()
-    location_url = url_for("get_recommendation", item_id=recommendation.id, _external=True)
+    location_url = url_for("get_recommendations", id=recommendation.id, _external=True)
 
     app.logger.info("Recommendation with ID [%d] created.", recommendation.id)
     return make_response(
         jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
     )
-
-
 
 ######################################################################
 # UPDATE AN EXISTING RECOMMENDATION
