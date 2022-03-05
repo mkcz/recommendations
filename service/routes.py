@@ -42,7 +42,6 @@ def index():
 def get_similar_products():
     """Returns all of the recommendation"""
     app.logger.info("Request for recommendation for category")
-    pets = []
     category = request.args.get("category")
     name = request.args.get("name")
     price = request.args.get("price")
@@ -55,13 +54,18 @@ def get_similar_products():
     else:
         products = ProductModel.all()
 
-    results = [pet.serialize() for pet in products]
-    app.logger.info("Returning %d pets", len(results))
+    results = [product.serialize() for product in products]
+    app.logger.info("Returning %d products", len(results))
     return make_response(jsonify(results), status.HTTP_200_OK)
 
 
 @app.route("/recommendations/<int:item_id>", methods=["GET"])
 def get_products(item_id):
+    """
+    Retrieve a single Product
+
+    This endpoint will return a Product based on it's id
+    """
     app.logger.info("Request for product with id: %s", item_id)
     product = ProductModel.find(item_id)
     if not product:
@@ -72,7 +76,11 @@ def get_products(item_id):
 
 
 @app.route("/recommendations", methods=["POST"])
-def create_pets():
+def create_products():
+    """
+    Creates a Product
+    This endpoint will create a Product based the data in the body that is posted
+    """
     app.logger.info("Request to create a Product")
     check_content_type("application/json")
     product = ProductModel()
@@ -89,7 +97,12 @@ def create_pets():
 
 @app.route("/recommendations/<int:item_id>", methods=["PUT"])
 def update_products(item_id):
-    app.logger.info("Request to update pet with id: %s", item_id)
+    """
+    Update a Product
+
+    This endpoint will update a Product based the body that is posted
+    """
+    app.logger.info("Request to update a product with id: %s", item_id)
     check_content_type("application/json")
     product = ProductModel.find(item_id)
     if not product:
@@ -103,14 +116,35 @@ def update_products(item_id):
 
 
 @app.route("/recommendations/<int:item_id>", methods=["DELETE"])
-def delete_pets(item_id):
-    app.logger.info("Request to delete pet with id: %s", item_id)
+def delete_products(item_id):
+    """
+    Delete a Product
+
+    This endpoint will delete a Product based the id specified in the path
+    """
+    app.logger.info("Request to delete product with id: %s", item_id)
     product = ProductModel.find(item_id)
     if product:
         product.delete()
 
     app.logger.info("product with ID [%s] delete complete.", item_id)
     return make_response("", status.HTTP_204_NO_CONTENT)
+
+
+@app.route("/recommendations/upsell/<string:category>", methods=["GET"])
+def get_highest_price(category):
+    """
+    Retreive a single Product
+
+    This endpoint will return a Product that is highest price in the category
+    """
+    app.logger.info("Request of product with highest price in the category: %s", category)
+    product = ProductModel.find_highest_price_product_by_category(category)
+    if not product:
+        raise NotFound("No products is in the category '{}'.".format(category))
+
+    app.logger.info("Returning Information regarding product: %s", product.name)
+    return make_response(jsonify(product.serialize()), status.HTTP_200_OK)
 
 
 ######################################################################

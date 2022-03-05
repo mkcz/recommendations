@@ -21,11 +21,15 @@ from service.models import ProductModel
 
 
 class ProductFactory(factory.Factory):
-    """Creates fake pets that you don't have to feed"""
+    """Creates fake products that you don't have to feed"""
 
     class Meta:
         model = ProductModel
 
+    MIN_PRICE = 0
+    MAX_PRICE = 999,999
+
     id = factory.Sequence(lambda n: n)
     name = factory.Faker("first_name")
     category = FuzzyChoice(choices=["phone", "laptop", "pods"])
+    price = factory.FuzzyInteger(MIN_PRICE, MAX_PRICE)
