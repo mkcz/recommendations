@@ -51,11 +51,6 @@ class Recommendation(db.Model):
         db.session.add(self)
         db.session.commit()
     
-    @classmethod
-    def find(cls, id: int):
-        """ Finds a Recommendation by it's ID """
-        logger.info("Processing lookup for id %s ...", id)
-        return cls.query.get(id)
 
     def __repr__(self):
         return "<Recommendation id=[%s], src_product_id=[%s], rec_product_id=[%s], type=[%s]>" % \
