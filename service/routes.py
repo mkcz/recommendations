@@ -4,9 +4,12 @@ Recommendations Service
 The recommendations resource is a representation a product recommendation based on another product
 """
 
-from flask import jsonify, request, url_for, abort
+from flask import jsonify, request, url_for, abort, make_response
+
 from service.models import Recommendation
 from . import app, status  # HTTP Status Codes
+from werkzeug.exceptions import NotFound
+
 
 ######################################################################
 # GET INDEX
@@ -37,9 +40,30 @@ def list_recommendations():
 ######################################################################
 
 
+
 ######################################################################
 # ADD A NEW RECOMMENDATION
 ######################################################################
+
+@app.route("/recommendations", methods=["POST"])
+def create_Recommendation():
+    """
+    Creates a Recommendation
+    This endpoint will create a Product based the data in the body that is posted
+    """
+    app.logger.info("Request to create a Product")
+    check_content_type("application/json")
+    recommendation = Recommendation()
+    recommendation.deserialize(request.get_json())
+    recommendation.create()
+    message = recommendation.serialize()
+    location_url = url_for("get_recommendation", item_id=recommendation.id, _external=True)
+
+    app.logger.info("Recommendation with ID [%d] created.", recommendation.id)
+    return make_response(
+        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    )
+
 
 
 ######################################################################
