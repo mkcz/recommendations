@@ -1,12 +1,12 @@
 """
-Models for Product
+Models for Recommendations
 
 All of the models are stored in this module
 """
 import logging
+from enum import Enum
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
-
 
 logger = logging.getLogger("flask.app")
 
@@ -19,80 +19,59 @@ class DataValidationError(Exception):
 
     pass
 
+class Type(Enum):
+    """Enumeration of valid Recommendation Types"""
 
-class Product(db.Model):
+    CROSS_SELL = 0
+    UP_SELL = 1
+    ACCESSORY = 2
+
+
+class Recommendation(db.Model):
     """
-    Class that represents a Product
+    Class that represents a Recommendation
     """
 
     app = None
 
     # Table Schema
-    id = db.Column(db.Integer, primary_key=True)
-    price = db.Column(db.Integer, nullable=False, default=0)
-    name = db.Column(db.String(63), nullable=False)
-    category = db.Column(db.String(63), nullable=False)
+    id = db.Column(db.Integer, primary_key=True) # recommendation id
+    src_product_id = db.Column(db.Integer, nullable=False) # source product id
+    rec_product_id = db.Column(db.Integer, nullable=False) # recommended product id
+    type = db.Column( # recommendation type
+        db.Enum(Type), nullable=False, server_default=(Type.CROSS_SELL.name)
+    )
 
-    def create(self):
-        """
-        Creates a Product to the database
-        """
-        logger.info("Creating %s", self.name)
-        self.id = None  # id must be none to generate next primary key
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        """
-        Updates a Product to the database
-        """
-        logger.info("Saving %s", self.name)
-        if not self.id:
-            raise DataValidationError("Update called with empty ID field")
-        if type(self.id) is not int:
-            raise DataValidationError("Update called with non-integer ID field")
-        if type(self.price) is not int:
-            raise DataValidationError("Update called with non-integer price field")
-        db.session.commit()
-
-    def delete(self):
-        """Removes a Pet from the data store"""
-        logger.info("Deleting %s", self.name)
-        db.session.delete(self)
-        db.session.commit()
+    def __repr__(self):
+        return "<Recommendation id=[%s], src_product_id=[%s], rec_product_id=[%s], type=[%s]>" % \
+            (self.id, self.src_product_id, self.rec_product_id, self.type.name)
 
     def serialize(self) -> dict:
-        """Serializes a Pet into a dictionary"""
+        """Serializes a Recommendation into a dictionary"""
         return {
             "id": self.id,
-            "price": self.price,
-            "name": self.name,
-            "category": self.category,
+            "src_product_id": self.src_product_id,
+            "rec_product_id": self.rec_product_id,
+            "type": self.type.name, # convert enum to string
         }
 
     def deserialize(self, data: dict):
         """
-        Deserializes a Pet from a dictionary
+        Deserializes a Recommendation from a dictionary
         Args:
-            data (dict): A dictionary containing the Pet data
+            data (dict): A dictionary containing the Recommendation data
         """
         try:
-            self.name = data["name"]
-            self.category = data["category"]
-            if isinstance(data["price"], int):
-                self.price = data["price"]
-            else:
-                raise DataValidationError(
-                    "Invalid type for integer [price]:"
-                    + str(type(data["price"]))
-                )
+            self.src_product_id = data["src_product_id"]
+            self.rec_product_id = data["rec_product_id"]
+            self.type = getattr(Type, data["type"])  # create enum from string
         except AttributeError as error:
             raise DataValidationError("Invalid attribute: " + error.args[0])
         except KeyError as error:
-            raise DataValidationError("Invalid product: missing " + error.args[0])
+            raise DataValidationError("Invalid recommendation: missing " + error.args[0])
         except TypeError as error:
             raise DataValidationError(
-                "Invalid product: body of request contained bad or no data " + str(error)
+                "Invalid recommendation: body of request contained bad or no data " + str(error)
             )
         return self
 
@@ -107,61 +86,4 @@ class Product(db.Model):
         db.init_app(app)
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
-
-    @classmethod
-    def all(cls) -> list:
-        """ Returns all of the Products in the database """
-        logger.info("Processing all Products")
-        return cls.query.all()
-
-    @classmethod
-    def find(cls, product_id: int):
-        """ Finds a Product by it's ID """
-        logger.info("Processing lookup for id %s ...", product_id)
-        return cls.query.get(product_id)
-
-    @classmethod
-    def find_or_404(cls, product_id: int):
-        """ Find a Product by it's id """
-        logger.info("Processing lookup or 404 for id %s ...", product_id)
-        return cls.query.get_or_404(product_id)
-
-    @classmethod
-    def find_by_name(cls, name: str) -> list:
-        """Returns all Products with the given name
-
-        Args:
-            name (string): the name of the Product you want to match
-        """
-        logger.info("Processing name query for %s ...", name)
-        return cls.query.filter(cls.name == name)
-
-    @classmethod
-    def find_products_of_same_category(cls, name: str):
-        category = cls.query.filter(cls.name == name).first()
-        return cls.query.filter(cls.category == "phone")
-
-    # @classmethod
-    # def find_products_of_same_category_greater_price(cls, item_name:str):
-    #     price = cls.query.filter(cls.name == item_name).first()
-    #     return cls.query.filter(cls.price > 100)
-
-    @classmethod
-    def find_by_category(cls, category: str):
-        logger.info("Processing category query for %s ...", category)
-        return cls.query.filter(cls.category == category)
-
-    @classmethod
-    def find_highest_price_product_by_category(cls, category: str):
-        """Returns the product with the highest price in the given category
-
-        Args:
-            category (string): the category in which the Product you want to find
-        """
-        logger.info("Processing highest price query in the category of %s ...", category)
-        query = cls.query.filter(cls.category == category).order_by(Product.price.desc())
-        if len(query.all()) == 0:
-            return []
-        maxprice = query[0].price
-        return cls.query.filter(cls.category == category, cls.price == maxprice)
 
