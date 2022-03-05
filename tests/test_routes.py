@@ -8,12 +8,12 @@ Test cases can be run with the following:
 import os
 import logging
 from unittest import TestCase
-from unittest.mock import MagicMock, patch
 from service import status  # HTTP Status Codes
 from service.models import db
 from service.routes import app, init_db
 from tests.factories import ProductFactory
 from urllib.parse import quote_plus
+#from unittest.mock import MagicMock, patch
 
 # DATABASE_URI = os.getenv('DATABASE_URI', 'sqlite:///../db/test.db')
 DATABASE_URI = os.getenv(
@@ -100,12 +100,12 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["name"], test_product.name)
 
     def test_get_product_not_found(self):
-        """Get a item thats not found"""
+        """Get a product thats not found"""
         resp = self.app.get("/recommendations/0")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_product(self):
-        """Create a new item"""
+        """Create a new product"""
         test_product = ProductFactory()
         logging.debug(test_product)
         resp = self.app.post(
@@ -193,17 +193,21 @@ class TestYourResourceServer(TestCase):
 
     def test_get_highest_price(self):
         """Get the highest price product by category"""
-        test_product = self._create_products(1)[0]
+        test_product = self._create_products(100)
+        maxprice, category = 0, test_product[0].category
+        for product in test_product:
+            if product.category != category:
+                continue
+            maxprice = max(maxprice, product.price)
         resp = self.app.get(
-            "/recommendations/upsell/{}".format(test_product.category),
+            "/recommendations/upsell/{}".format(category),
             content_type=CONTENT_TYPE_JSON
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        data = resp.get_json()
-        self.assertEqual(data["id"], test_product.id)
-        self.assertEqual(data["name"], test_product.name)
-        self.assertEqual(data["price"], test_product.price)
-        self.assertEqual(data["category"], test_product.category)
+        dataset = resp.get_json()
+        for data in dataset:
+            self.assertEqual(data["price"], maxprice)
+            self.assertEqual(data["category"], category)
 
     def test_get_highest_price_not_found(self):
         """Get the highest price product by Category but not found"""

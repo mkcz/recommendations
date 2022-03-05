@@ -1,11 +1,10 @@
 """
-Models for YourResourceModel
+Models for Product
 
 All of the models are stored in this module
 """
 import logging
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import desc
 from flask import Flask
 
 
@@ -21,7 +20,7 @@ class DataValidationError(Exception):
     pass
 
 
-class ProductModel(db.Model):
+class Product(db.Model):
     """
     Class that represents a Product
     """
@@ -30,7 +29,7 @@ class ProductModel(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
-    price = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Integer, nullable=False, default=0)
     name = db.Column(db.String(63), nullable=False)
     category = db.Column(db.String(63), nullable=False)
 
@@ -93,7 +92,7 @@ class ProductModel(db.Model):
             raise DataValidationError("Invalid product: missing " + error.args[0])
         except TypeError as error:
             raise DataValidationError(
-                "Invalid pet: body of request contained bad or no data " + str(error)
+                "Invalid product: body of request contained bad or no data " + str(error)
             )
         return self
 
@@ -142,10 +141,10 @@ class ProductModel(db.Model):
         category = cls.query.filter(cls.name == name).first()
         return cls.query.filter(cls.category == "phone")
 
-    @classmethod
-    def find_products_of_same_category_greater_price(cls, item_name:str):
-        price = cls.query.filter(cls.name == item_name).first()
-        return cls.query.filter(cls.price > 100)
+    # @classmethod
+    # def find_products_of_same_category_greater_price(cls, item_name:str):
+    #     price = cls.query.filter(cls.name == item_name).first()
+    #     return cls.query.filter(cls.price > 100)
 
     @classmethod
     def find_by_category(cls, category: str):
@@ -153,13 +152,16 @@ class ProductModel(db.Model):
         return cls.query.filter(cls.category == category)
 
     @classmethod
-    def find_highest_price_product_by_category(cls, category):
+    def find_highest_price_product_by_category(cls, category: str):
         """Returns the product with the highest price in the given category
 
         Args:
             category (string): the category in which the Product you want to find
         """
         logger.info("Processing highest price query in the category of %s ...", category)
-        query = cls.query.filter(cls.category == category).order_by(cls.price.desc())
-        return None if len(query.all())==0 else query[0]
+        query = cls.query.filter(cls.category == category).order_by(Product.price.desc())
+        if len(query.all()) == 0:
+            return []
+        maxprice = query[0].price
+        return cls.query.filter(cls.category == category, cls.price == maxprice)
 
