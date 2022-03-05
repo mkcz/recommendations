@@ -4,12 +4,9 @@ Recommendations Service
 The recommendations resource is a representation a product recommendation based on another product
 """
 
-from flask import jsonify, request, url_for, abort, make_response
-
+from flask import jsonify, request, url_for, abort
 from service.models import Recommendation
 from . import app, status  # HTTP Status Codes
-from werkzeug.exceptions import NotFound
-
 
 ######################################################################
 # GET INDEX
@@ -39,45 +36,10 @@ def list_recommendations():
 # RETRIEVE A RECOMMENDATION BY ID
 ######################################################################
 
-@app.route("/recommendations/<int:item_id>", methods=["GET"])
-def get_recommendation(item_id):
-    """
-    Retrieve a single recommendation
-    This endpoint will return a recommendation based on it's id
-    """
-    app.logger.info("Request for recommendation with id: %s", item_id)
-    recommendation = Recommendation.find(item_id)
-    if not recommendation:
-        raise NotFound("Recommendation with id '{}' was not found.".format(item_id))
-
-    app.logger.info("Returning Information regarding product: %s", recommendation.id)
-    return make_response(jsonify(recommendation.serialize()), status.HTTP_200_OK)
-
-
 
 ######################################################################
 # ADD A NEW RECOMMENDATION
 ######################################################################
-
-@app.route("/recommendations", methods=["POST"])
-def create_Recommendation():
-    """
-    Creates a Recommendation
-    This endpoint will create a Product based the data in the body that is posted
-    """
-    app.logger.info("Request to create a Product")
-    check_content_type("application/json")
-    recommendation = Recommendation()
-    recommendation.deserialize(request.get_json())
-    recommendation.create()
-    message = recommendation.serialize()
-    location_url = url_for("get_recommendation", item_id=recommendation.id, _external=True)
-
-    app.logger.info("Recommendation with ID [%d] created.", recommendation.id)
-    return make_response(
-        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
-    )
-
 
 
 ######################################################################
