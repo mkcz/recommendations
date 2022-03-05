@@ -18,16 +18,16 @@ Test Factory to make fake objects for testing
 import factory
 from factory.fuzzy import FuzzyChoice
 from factory.fuzzy import FuzzyInteger
-from service.models import Product
+from service.models import Recommendation, Type
 
 
-class ProductFactory(factory.Factory):
-    """Creates fake products that you don't have to feed"""
+class RecommendationFactory(factory.Factory):
+    """Creates fake recommendations that you don't have to feed"""
 
     class Meta:
-        model = Product
+        model = Recommendation
 
     id = factory.Sequence(lambda n: n)
-    name = factory.Faker("first_name")
-    category = FuzzyChoice(choices=["phone", "laptop", "pods"])
-    price = FuzzyInteger(999999)
+    src_product_id = FuzzyInteger(999)
+    rec_product_id = FuzzyInteger(999)
+    type = FuzzyChoice(choices=[Type.CROSS_SELL, Type.UP_SELL, Type.ACCESSORY])
