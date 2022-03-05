@@ -50,6 +50,14 @@ class Recommendation(db.Model):
         self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
+        
+    def delete(self):
+        """
+        Removes a Pet from the data store
+        """
+        logger.info("Deleting %s", self.id)
+        db.session.delete(self)
+        db.session.commit()
     
 
     def __repr__(self):
