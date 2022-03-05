@@ -67,22 +67,6 @@ class TestRecommendationServer(TestCase):
             recommendations.append(test_recommendation)
         return recommendations
     
-    def _create_recommendations(self, count):
-        """Factory method to create items in bulk"""
-        recommendations = []
-        for _ in range(count):
-            test_recommendation = RecommendationFactory()
-            resp = self.app.post(
-                BASE_URL, json=test_recommendation.serialize(), content_type=CONTENT_TYPE_JSON
-            )
-            self.assertEqual(
-                resp.status_code, status.HTTP_201_CREATED, "Could not create test product"
-            )
-            new_product = resp.get_json()
-            test_recommendation.id = new_product["id"]
-            recommendations.append(test_recommendation)
-        return recommendations
-
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
