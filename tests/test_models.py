@@ -61,6 +61,7 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertIn("rec_product_id", data)
         self.assertEqual(data["rec_product_id"], recommendation.rec_product_id)
         self.assertIn("type", data)
+        self.assertEqual(data["type"], recommendation.type.name)
 
     def test_deserialize_a_recommendation(self):
         """Test deserialization of a recommendation"""
@@ -89,25 +90,3 @@ class TestRecommendationModel(unittest.TestCase):
         recommendation = Recommendation()
         data = "this is not a dictionary"
         self.assertRaises(DataValidationError, recommendation.deserialize, data)
-    
-    def test_create_a_recommendation(self):
-        """Create a Recommendation and assert that it exists"""
-        recommendation = Recommendation(id=1, src_product_id=100, rec_product_id=200, type= "UP_SELL")
-        self.assertIsNot(recommendation, None)
-        self.assertEqual(recommendation.id, 1)
-        self.assertEqual(recommendation.src_product_id, 100)
-        self.assertEqual(recommendation.rec_product_id, 200)
-        self.assertEqual(recommendation.type, "UP_SELL")
-
-    def test_add_a_recommendation(self):
-        """Create a Recommendation and add it to the database"""
-        recommendations = Recommendation.all()
-        self.assertEqual(recommendations, [])
-        recommendation = Recommendation(id=1, src_product_id=100, rec_product_id=200, type= "UP_SELL")
-        self.assertTrue(recommendation != None)
-        self.assertEqual(recommendation.id, 1)
-        recommendation.create()
-        # Assert that it was assigned an id and shows up in the database
-        self.assertEqual(recommendation.id, 1)
-        recommendations = Recommendation.all()
-        self.assertEqual(len(recommendations), 1)

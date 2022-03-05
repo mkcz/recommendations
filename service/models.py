@@ -42,21 +42,6 @@ class Recommendation(db.Model):
         db.Enum(Type), nullable=False, server_default=(Type.CROSS_SELL.name)
     )
 
-    def create(self):
-        """
-        Creates a Recommendation to the database
-        """
-        # logger.info("Creating %d", self.id)
-        self.id = None  # id must be none to generate next primary key
-        db.session.add(self)
-        db.session.commit()
-    
-    @classmethod
-    def find(cls, id: int):
-        """ Finds a Recommendation by it's ID """
-        logger.info("Processing lookup for id %s ...", id)
-        return cls.query.get(id)
-
     def __repr__(self):
         return "<Recommendation id=[%s], src_product_id=[%s], rec_product_id=[%s], type=[%s]>" % \
             (self.id, self.src_product_id, self.rec_product_id, self.type.name)
@@ -101,10 +86,3 @@ class Recommendation(db.Model):
         db.init_app(app)
         app.app_context().push()
         db.create_all()  # make our sqlalchemy tables
-
-    @classmethod
-    def all(cls) -> list:
-        """ Returns all of the Products in the database """
-        logger.info("Processing all Products")
-        return cls.query.all()
-
