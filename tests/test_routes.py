@@ -190,3 +190,22 @@ class TestYourResourceServer(TestCase):
         # check the data just to be sure
         for product in data:
             self.assertEqual(product["category"], test_category)
+
+    def test_get_highest_price(self):
+        """Get the highest price product by category"""
+        test_product = self._create_products(1)[0]
+        resp = self.app.get(
+            "/recommendations/upsell/{}".format(test_product.category),
+            content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["id"], test_product.id)
+        self.assertEqual(data["name"], test_product.name)
+        self.assertEqual(data["price"], test_product.price)
+        self.assertEqual(data["category"], test_product.category)
+
+    def test_get_highest_price_not_found(self):
+        """Get the highest price product by Category but not found"""
+        resp = self.app.get("/recommendations/upsell/phone")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)

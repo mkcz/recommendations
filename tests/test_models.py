@@ -68,7 +68,7 @@ class TestProductModel(unittest.TestCase):
         self.assertTrue(product != None)
         self.assertEqual(product.id, None)
         product.create()
-        # Asert that it was assigned an id and shows up in the database
+        # Assert that it was assigned an id and shows up in the database
         self.assertEqual(product.id, 1)
         products = product.all()
         self.assertEqual(len(products), 1)
