@@ -53,7 +53,7 @@ class Recommendation(db.Model):
         
     def delete(self):
         """
-        Removes a Pet from the data store
+        Removes a Recommendation from the database
         """
         logger.info("Deleting %s", self.id)
         db.session.delete(self)
