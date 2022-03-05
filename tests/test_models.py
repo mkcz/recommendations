@@ -90,4 +90,3 @@ class TestRecommendationModel(unittest.TestCase):
         recommendation = Recommendation()
         data = "this is not a dictionary"
         self.assertRaises(DataValidationError, recommendation.deserialize, data)
-
