@@ -51,4 +51,24 @@ class TestProductModel(unittest.TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    
+    def test_create_a_product(self):
+        """Create a item and assert that it exists"""
+        product = Product(id=1, name="iPhone", category="phone", price=100)
+        self.assertIsNot(product, None)
+        self.assertEqual(product.id, 1)
+        self.assertEqual(product.name, "iPhone")
+        self.assertEqual(product.category, "phone")
+        self.assertEqual(product.price, 100)
+
+    def test_add_a_product(self):
+        """Create a item and add it to the database"""
+        products = Product.all()
+        self.assertEqual(products, [])
+        product = Product(id=1, name="iPhone", category="phone", price=100)
+        self.assertTrue(product != None)
+        self.assertEqual(product.id, 1)
+        product.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertEqual(product.id, 1)
+        products = product.all()
+        self.assertEqual(len(products), 1)

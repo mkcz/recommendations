@@ -33,6 +33,26 @@ def index():
     )
 
 
+@app.route("/recommendations", methods=["POST"])
+def create_products():
+    """
+    Creates a Product
+    This endpoint will create a Product based the data in the body that is posted
+    """
+    app.logger.info("Request to create a Product")
+    check_content_type("application/json")
+    product = Product()
+    product.deserialize(request.get_json())
+    product.create()
+    message = product.serialize()
+    location_url = url_for("get_products", item_id=product.id, _external=True)
+
+    app.logger.info("product with ID [%s] created.", product.id)
+    return make_response(
+        jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
+    )
+
+
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
