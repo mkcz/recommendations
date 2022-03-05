@@ -61,6 +61,7 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertIn("rec_product_id", data)
         self.assertEqual(data["rec_product_id"], recommendation.rec_product_id)
         self.assertIn("type", data)
+        self.assertEqual(data["type"], recommendation.type.name)
 
     def test_deserialize_a_recommendation(self):
         """Test deserialization of a recommendation"""
