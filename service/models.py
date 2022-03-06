@@ -53,7 +53,7 @@ class Recommendation(db.Model):
         
      def update(self):
         """
-        Updates a Product to the database
+        Updates a Recommendation to the database
         """
         logger.info("Saving %s", self.name)
         if not self.id:
