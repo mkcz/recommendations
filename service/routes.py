@@ -69,7 +69,23 @@ def create_Recommendation():
 ######################################################################
 # UPDATE AN EXISTING RECOMMENDATION
 ######################################################################
+@app.route("/recommendations/<int:item_id>", methods=["PUT"])
+def update_products(item_id):
+    """
+    Update a Product
+    This endpoint will update a Product based the body that is posted
+    """
+    app.logger.info("Request to update a product with id: %s", item_id)
+    check_content_type("application/json")
+    product = Product.find(item_id)
+    if not product:
+        raise NotFound("product with id '{}' was not found.".format(item_id))
+    product.deserialize(request.get_json())
+    product.id = item_id
+    product.update()
 
+    app.logger.info("product with ID [%s] updated.", product.id)
+    return make_response(jsonify(product.serialize()), status.HTTP_200_OK)
 
 ######################################################################
 # DELETE A RECOMMENDATION
