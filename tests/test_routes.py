@@ -113,3 +113,25 @@ class TestRecommendationServer(TestCase):
         """Create a recommendation with no content type"""
         resp = self.app.post(BASE_URL)
         self.assertEqual(resp.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        
+     def test_update_recommendatio(self):
+        """Update an existing item"""
+        # create a recommendatio to update
+        test_recommendation = RecommendationFactory()
+        resp = self.app.post(
+            BASE_URL, json=test_recommendation.serialize(), content_type=CONTENT_TYPE_JSON
+        )
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # update the recommendation
+        new_recommendation = resp.get_json()
+        logging.debug(new_recommendation)
+        new_recommendation["category"] = "unknown"
+        resp = self.app.put(
+            "/recommendations/{}".format(new_recommendation["id"]),
+            json=new_recommendation,
+            content_type=CONTENT_TYPE_JSON,
+        )
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        updated_recommendation = resp.get_json()
+        self.assertEqual(updated_recommendation["category"], "unknown")
