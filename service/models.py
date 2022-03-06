@@ -60,8 +60,10 @@ class Recommendation(db.Model):
             raise DataValidationError("Update called with empty ID field")
         if type(self.id) is not int:
             raise DataValidationError("Update called with non-integer ID field")
-        if type(self.price) is not int:
-            raise DataValidationError("Update called with non-integer price field")
+        if not self.src_product_id:
+            raise DataValidationError("Update called with empty source ID")
+        if not self.rec_product_id:
+            raise DataValidationError("Update called with empty recommended product ID")
     
 
     def __repr__(self):
