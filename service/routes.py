@@ -75,7 +75,7 @@ def create_Recommendation():
 # DELETE A RECOMMENDATION
 ######################################################################
 @app.route("/recommendations/<int:item_id>", methods=["DELETE"])
-def delete_recommendation(item_id):
+def delete_recommendations(item_id):
     """
     Delete a recommendation
     This endpoint will delete a recommendation based the id specified in the path
