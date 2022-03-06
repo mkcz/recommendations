@@ -50,6 +50,18 @@ class Recommendation(db.Model):
         self.id = None  # id must be none to generate next primary key
         db.session.add(self)
         db.session.commit()
+        
+     def update(self):
+        """
+        Updates a Product to the database
+        """
+        logger.info("Saving %s", self.name)
+        if not self.id:
+            raise DataValidationError("Update called with empty ID field")
+        if type(self.id) is not int:
+            raise DataValidationError("Update called with non-integer ID field")
+        if type(self.price) is not int:
+            raise DataValidationError("Update called with non-integer price field")
     
 
     def __repr__(self):
