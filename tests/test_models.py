@@ -135,9 +135,9 @@ class TestRecommendationModel(unittest.TestCase):
 
     def test_update_a_recommendation_validation_error(self):
         """Update a item Validation Error"""
-        recommendation = Recommendation(id=1, name="iPhone", category="Phone", price="100")
+        recommendation = Recommendation(id=1, src_product_id=100, rec_product_id = 200, type= "UP_SELL")
         self.assertRaises(DataValidationError, recommendation.update)
-        recommendation = Recommendation(name="iPhone", category="Phone", price=100)
+        recommendation = Recommendation(src_product_id=100, rec_product_id = 200, type= "UP_SELL")
         self.assertRaises(DataValidationError, recommendation.update)
-        recommendation = Recommendation(id="1", name="iPhone", category="Phone", price=100)
+        recommendation = Recommendation(id=1, src_product_id=100, rec_product_id = 200, type= "UP_SELL")
         self.assertRaises(DataValidationError, recommendation.update)
