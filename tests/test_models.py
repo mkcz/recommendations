@@ -119,5 +119,5 @@ class TestRecommendationModel(unittest.TestCase):
         recommendation.create()
         self.assertEqual(len(recommendation.all()), 1)
         # delete the  recommendation and make sure it isn't in the database
-        product.delete()
+        recommendation.delete()
         self.assertEqual(len( recommendation.all()), 0)    
