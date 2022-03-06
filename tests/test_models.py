@@ -112,3 +112,31 @@ class TestRecommendationModel(unittest.TestCase):
         self.assertEqual(recommendation.id, 1)
         recommendations = Recommendation.all()
         self.assertEqual(len(recommendations), 1)
+        
+    def test_update_a_recommendation(self):
+        """Update a item"""
+        recommendation = Recommendation(id=1, name="iPhone", category="phone", price=100)
+        self.assertIsNot(recommendation, None)
+        self.assertEqual(recommendation.id, 1)
+        recommendation.create()
+        # Change it an save it
+        recommendation.category = "laptop"
+        original_id = recommendation.id
+        recommendation.update()
+        self.assertEqual(recommendation.id, original_id)
+        self.assertEqual(recommendation.category, "laptop")
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        recommendations = Recommendation.all()
+        self.assertEqual(len(recommendations), 1)
+        self.assertEqual(recommendations[0].id, 1)
+        self.assertEqual(recommendations[0].category, "laptop")
+
+    def test_update_a_recommendation_validation_error(self):
+        """Update a item Validation Error"""
+        recommendation = Recommendation(id=1, name="iPhone", category="Phone", price="100")
+        self.assertRaises(DataValidationError, recommendation.update)
+        recommendation = Recommendation(name="iPhone", category="Phone", price=100)
+        self.assertRaises(DataValidationError, recommendation.update)
+        recommendation = Recommendation(id="1", name="iPhone", category="Phone", price=100)
+        self.assertRaises(DataValidationError, recommendation.update)
